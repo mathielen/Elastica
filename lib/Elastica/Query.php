@@ -364,7 +364,7 @@ class Query extends Param
             $this->setQuery(new MatchAll());
         }
 
-        if (isset($this->_params['post_filter']) && 0 === count($this->_params['post_filter'])) {
+        if (isset($this->_params['post_filter']) && is_array(isset($this->_params['post_filter'])) && 0 === count($this->_params['post_filter'])) {
             unset($this->_params['post_filter']);
         }
 
