@@ -1,14 +1,14 @@
 <?php
+
 namespace Elastica\Aggregation;
 
 use Elastica\Exception\InvalidException;
-use Elastica\Filter\AbstractFilter;
 use Elastica\Query\AbstractQuery;
 
 /**
  * Class Filters.
  *
- * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filters-aggregation.html
+ * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filters-aggregation.html
  */
 class Filters extends AbstractAggregation
 {
@@ -32,16 +32,6 @@ class Filters extends AbstractAggregation
      */
     public function addFilter($filter, $name = null)
     {
-        if ($filter instanceof AbstractFilter) {
-            trigger_error('Deprecated: Elastica\Aggregation\Filters\addFilter() passing filter as AbstractFilter is deprecated. Pass instance of AbstractQuery instead.', E_USER_DEPRECATED);
-        } elseif (!($filter instanceof AbstractQuery)) {
-            throw new InvalidException('Filter must be instance of AbstractQuery');
-        }
-
-        if (null !== $name && !is_string($name)) {
-            throw new InvalidException('Name must be a string');
-        }
-
         $filterArray = [];
 
         $type = self::NAMED_TYPE;
@@ -54,7 +44,7 @@ class Filters extends AbstractAggregation
         }
 
         if ($this->hasParam('filters')
-            && count($this->getParam('filters'))
+            && \count($this->getParam('filters'))
             && $this->_type !== $type
         ) {
             throw new InvalidException('Mix named and anonymous keys are not allowed');
@@ -63,6 +53,26 @@ class Filters extends AbstractAggregation
         $this->_type = $type;
 
         return $this->addParam('filters', $filterArray);
+    }
+
+    /**
+     * @param bool $otherBucket
+     *
+     * @return $this
+     */
+    public function setOtherBucket(bool $otherBucket): self
+    {
+        return $this->setParam('other_bucket', $otherBucket);
+    }
+
+    /**
+     * @param string $otherBucketKey
+     *
+     * @return $this
+     */
+    public function setOtherBucketKey(string $otherBucketKey): self
+    {
+        return $this->setParam('other_bucket_key', $otherBucketKey);
     }
 
     /**
@@ -75,11 +85,19 @@ class Filters extends AbstractAggregation
 
         foreach ($filters as $filter) {
             if (self::NAMED_TYPE === $this->_type) {
-                $key = key($filter);
-                $array['filters']['filters'][$key] = current($filter)->toArray();
+                $key = \key($filter);
+                $array['filters']['filters'][$key] = \current($filter)->toArray();
             } else {
-                $array['filters']['filters'][] = current($filter)->toArray();
+                $array['filters']['filters'][] = \current($filter)->toArray();
             }
+        }
+
+        if ($this->hasParam('other_bucket')) {
+            $array['filters']['other_bucket'] = $this->getParam('other_bucket');
+        }
+
+        if ($this->hasParam('other_bucket_key')) {
+            $array['filters']['other_bucket_key'] = $this->getParam('other_bucket_key');
         }
 
         if ($this->_aggs) {
