@@ -6,12 +6,14 @@ services:
 branches:
   only:
     - master
+    - 3.x
 
 env:
   - TARGET="54"
   - TARGET="55"
   - TARGET="56"
   - TARGET="70"
+  - TARGET="72"
 
 before_install:
   # Docker-compose installation
